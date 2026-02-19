@@ -1,25 +1,46 @@
-// Create New Post
-function createPost() {
-    let content = document.getElementById("postContent").value;
+document.addEventListener("DOMContentLoaded", function() {
+    // Button references
+    const feedBtn = document.getElementById("feedBtn");
+    const postBtn = document.getElementById("postBtn");
+    const postBox = document.getElementById("post-box");
+    const closeBtn = document.querySelector(".close-btn");
+    const feed = document.getElementById("feed");
 
-    if (content.trim() === "") return;
+    // Show Feed
+    feedBtn.addEventListener("click", function() {
+        feed.style.display = "block";
+        postBox.style.display = "none";
+    });
+
+    // Show Post Box
+    postBtn.addEventListener("click", function() {
+        feed.style.display = "none";
+        postBox.style.display = "block";
+    });
+
+    // Close Post Box
+    closeBtn.addEventListener("click", function() {
+        postBox.style.display = "none";
+        feed.style.display = "block";
+    });
+});
+
+// Submit New Post
+function submitPost() {
+    const content = document.getElementById("newPost").value.trim();
+    if (!content) return alert("Write something!");
 
     fetch("api/create_post.php", {
         method: "POST",
-        headers: {
-            "Content-Type": "application/x-www-form-urlencoded"
-        },
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: "content=" + encodeURIComponent(content)
     })
     .then(res => res.text())
-    .then(response => {
-        if (response.includes("Slow down")) {
-            alert(response);
-            return;
-        }
-
-        document.getElementById("postContent").value = "";
-        loadPosts();
+    .then(() => {
+        document.getElementById("newPost").value = "";
+        document.getElementById("post-box").style.display = "none";
+        document.getElementById("feed").style.display = "block";
+        location.reload(); // reload feed
     });
 }
 
@@ -27,51 +48,25 @@ function createPost() {
 function likePost(postId) {
     fetch("api/toggle_like.php", {
         method: "POST",
-        headers: {
-            "Content-Type": "application/x-www-form-urlencoded"
-        },
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: "post_id=" + postId
     })
-    .then(() => {
-        loadPosts();
-    });
+    .then(() => location.reload());
 }
 
 // Add Comment
 function addComment(postId) {
-    let input = document.getElementById("comment-" + postId);
-    let content = input.value;
-
-    if (content.trim() === "") return;
+    const input = document.getElementById("comment-" + postId);
+    const content = input.value.trim();
+    if (!content) return;
 
     fetch("api/add_comment.php", {
         method: "POST",
-        headers: {
-            "Content-Type": "application/x-www-form-urlencoded"
-        },
-        body: "post_id=" + postId +
-              "&content=" + encodeURIComponent(content)
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: "post_id=" + postId + "&content=" + encodeURIComponent(content)
     })
-    .then(res => res.text())
-    .then(response => {
-        if (response.includes("Slow down")) {
-            alert(response);
-            return;
-        }
-
+    .then(() => {
         input.value = "";
-        loadPosts();
+        location.reload();
     });
 }
-
-// Load Posts Automatically
-function loadPosts() {
-    fetch("api/fetch_posts.php")
-        .then(res => res.text())
-        .then(data => {
-            document.getElementById("posts").innerHTML = data;
-        });
-}
-
-// Load when page starts
-loadPosts();

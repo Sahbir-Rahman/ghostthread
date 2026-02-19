@@ -26,8 +26,6 @@ $result = $stmt->get_result();
 while ($row = $result->fetch_assoc()) {
 
     echo "<div class='post'>";
-
-    // Post content
     echo "<p>" . htmlspecialchars($row['content']) . "</p>";
 
     // Like button
@@ -38,7 +36,7 @@ while ($row = $result->fetch_assoc()) {
 
     echo "<hr>";
 
-    // Fetch comments for this post
+    // Comments
     $cstmt = $conn->prepare(
         "SELECT content FROM comments WHERE post_id = ? ORDER BY id ASC"
     );
@@ -48,22 +46,18 @@ while ($row = $result->fetch_assoc()) {
 
     echo "<div class='comments'>";
     while ($c = $comments->fetch_assoc()) {
-        echo "<div class='comment'>💬 "
-             . htmlspecialchars($c['content']) .
-             "</div>";
+        echo "<div class='comment'>💬 " . htmlspecialchars($c['content']) . "</div>";
     }
     echo "</div>";
 
-    // Comment input
+    // Comment input + send icon
     echo "
-        <input type='text'
-               id='comment-{$row['id']}'
-               placeholder='Write a comment anonymously...'>
-
+        <input type='text' id='comment-{$row['id']}' placeholder='Write a comment anonymously...'>
         <button onclick='addComment({$row['id']})'>
-            Comment
+            <i class='bi bi-send-fill'></i>
         </button>
     ";
 
     echo "</div>";
 }
+
